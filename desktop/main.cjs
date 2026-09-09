@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, protocol, net, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const { spawnSync } = require('child_process')
 const { pathToFileURL } = require('url')
 
 protocol.registerSchemesAsPrivileged([
@@ -201,6 +202,18 @@ function registerIpc() {
     const meta = readReadingMeta(courseId, id)
     return { mime: meta?.mime || 'application/octet-stream', data: fs.readFileSync(file) }
   })
+  ipcMain.handle('northstar:gitStatus', async () => runGitTool(['status']))
+  ipcMain.handle('northstar:gitCommit', async (_e, payload) =>
+    runGitTool([
+      'commit',
+      '--comment',
+      String(payload?.comment || ''),
+      '--course',
+      String(payload?.courseId || ''),
+      '--week',
+      String(payload?.week || ''),
+    ])
+  )
   ipcMain.handle('northstar:deleteReading', async (_e, courseId, id) => {
     const dir = readingsDir(courseId)
     const base = path.join(dir, safeId(id))
@@ -213,6 +226,22 @@ function registerIpc() {
     }
     return { ok: true }
   })
+}
+
+function runGitTool(args) {
+  const script = path.join(__dirname, '..', 'scripts', 'git_work.py')
+  const proc = spawnSync('python3', [script, ...args], {
+    encoding: 'utf8',
+    timeout: 100000,
+    env: { ...process.env, HOME: process.env.HOME || require('os').homedir() },
+  })
+  const text = (proc.stdout || '').trim() || (proc.stderr || '').trim()
+  try {
+    if (text.startsWith('{')) return JSON.parse(text)
+  } catch {
+    /* fall through */
+  }
+  return { ok: false, error: text.slice(0, 400) || `git exit ${proc.status}` }
 }
 
 function safeId(id) {

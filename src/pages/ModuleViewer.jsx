@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { gitCommit, gitStatus } from '../lib/git.js'
 import { useStudent, useRemember } from '../context/StudentContext.jsx'
 import { formatLong } from '../lib/dates.js'
 import LinedEditor from '../components/LinedEditor.jsx'
@@ -61,7 +62,7 @@ export default function ModuleViewer() {
           <ReadList items={w.lectures} />
         </div>
       </div>
-      {c.gitChecklist && <GitRecordCard course={c} enrollment={en} />}
+      {c.gitChecklist && <GitRecordCard course={c} enrollment={en} week={n} />}
       <div className="card" style={{ marginTop: 12 }}>
         <h3>This week’s graded work</h3>
         {items.length === 0 && <p className="page-sub">No formal graded item this week — do the lab and mark complete.</p>}
@@ -180,17 +181,55 @@ function ReadList({ items, courseId, week, checks }) {
   )
 }
 
-function GitRecordCard({ course, enrollment }) {
+function GitRecordCard({ course, enrollment, week }) {
   const s = useStudent()
   const [comment, setComment] = useState('')
-  const [url, setUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [info, setInfo] = useState(null)
   const checks = enrollment?.gitChecks || {}
   const records = enrollment?.gitRecords || []
+
+  useEffect(() => {
+    gitStatus()
+      .then(setInfo)
+      .catch(() => setInfo(null))
+  }, [records.length])
+
+  async function commitAndPush() {
+    const text = comment.trim()
+    if (!text) {
+      setErr('Write what you did. That becomes the commit message.')
+      return
+    }
+    setBusy(true)
+    setErr('')
+    try {
+      const result = await gitCommit({ comment: text, courseId: course.id, week })
+      s.addGitRecord(course.id, {
+        comment: text,
+        url: result.url || '',
+        hash: result.hash || '',
+        branch: result.branch || '',
+        pushed: !!result.pushed,
+      })
+      if (result.hash) s.setGitCheck(course.id, 'Initialize a git repo (or clone your Northstar workspace).', true)
+      setComment('')
+      setInfo((prev) => ({ ...prev, ...result, head: result.short || result.hash, dirty: false }))
+      if (!result.pushed && result.pushError) setErr(`Saved the commit, but push failed: ${result.pushError}`)
+    } catch (e) {
+      setErr(e.message || 'Git commit failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="card" style={{ marginTop: 12 }}>
       <h3>Git workflow</h3>
       <p className="page-sub">
-        On iPad you may not have the files. Do the work on Linux, then record it here with a comment. Checkboxes save.
+        Write a real sentence, then commit and push to GitHub from this app. On iPad this uses the Linux server — you do not need the files on the tablet.
+        {info?.branch ? ` Current branch: ${info.branch}${info.head ? ` @ ${info.head}` : ''}.` : ''}
       </p>
       <div className="progress-list">
         {course.gitChecklist.map((g) => (
@@ -201,40 +240,41 @@ function GitRecordCard({ course, enrollment }) {
         ))}
       </div>
       <div className="field-wrap" style={{ marginTop: 12 }}>
-        <label className="field">Comment (what you did, commit hash, blockers)</label>
-        <textarea className="textarea" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Branched cs101-p1, three commits, README added. Hash abc123." />
+        <label className="field">Commit message</label>
+        <textarea
+          className="textarea"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Document PATH, editor, and git version for bootcamp week 1."
+        />
       </div>
-      <div className="field-wrap">
-        <label className="field">GitHub URL (optional)</label>
-        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://github.com/you/repo/pull/1" />
+      <div className="btn-row">
+        <button type="button" className="btn primary" disabled={busy} onClick={commitAndPush}>
+          {busy ? 'Committing…' : 'Commit and push'}
+        </button>
       </div>
-      <button
-        type="button"
-        className="btn primary"
-        onClick={() => {
-          if (!comment.trim() && !url.trim()) return
-          s.addGitRecord(course.id, { comment: comment.trim(), url: url.trim() })
-          setComment('')
-          setUrl('')
-        }}
-      >
-        Record git work
-      </button>
+      {err && <div className="banner-strip warn" style={{ marginTop: 12 }}>{err}</div>}
       {records.length > 0 && (
         <ul style={{ marginTop: 12 }}>
-          {records.slice().reverse().slice(0, 6).map((r, i) => (
-            <li key={r.at || i}>
-              {r.at ? new Date(r.at).toLocaleString() : ''} — {r.comment}
-              {r.url ? (
-                <>
-                  {' '}
-                  <a href={r.url} target="_blank" rel="noreferrer">
-                    link
-                  </a>
-                </>
-              ) : null}
-            </li>
-          ))}
+          {records
+            .slice()
+            .reverse()
+            .slice(0, 6)
+            .map((r, i) => (
+              <li key={r.at || i}>
+                {r.at ? new Date(r.at).toLocaleString() : ''} — {r.comment}
+                {r.hash ? ` (${String(r.hash).slice(0, 7)})` : ''}
+                {r.url ? (
+                  <>
+                    {' '}
+                    <a href={r.url} target="_blank" rel="noreferrer">
+                      GitHub
+                    </a>
+                  </>
+                ) : null}
+                {r.pushed === false ? ' · local only' : ''}
+              </li>
+            ))}
         </ul>
       )}
     </div>

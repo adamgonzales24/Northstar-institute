@@ -9,6 +9,7 @@ import json
 import os
 import re
 import socket
+import subprocess
 import sys
 import tempfile
 import threading
@@ -69,6 +70,9 @@ class SpaHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/ai/status":
             self._ai_status()
             return
+        if path == "/api/git/status":
+            self._git_tool(["status"])
+            return
         reading = self._reading_parts(path)
         if reading:
             self._send_reading_file(*reading)
@@ -84,6 +88,9 @@ class SpaHandler(http.server.SimpleHTTPRequestHandler):
             return
         if path == "/api/ai/grade":
             self._ai_grade()
+            return
+        if path == "/api/git/commit":
+            self._git_commit()
             return
         self.send_error(404, "Not found")
 
@@ -239,6 +246,39 @@ class SpaHandler(http.server.SimpleHTTPRequestHandler):
         }
         Path(str(base) + ".json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
         self._send_json({"ok": True, "id": item_id})
+
+    def _git_tool(self, args: list[str]) -> None:
+        script = ROOT / "scripts" / "git_work.py"
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(script), *args],
+                capture_output=True,
+                text=True,
+                timeout=100,
+                cwd=str(ROOT),
+                env={**os.environ, "HOME": str(Path.home())},
+            )
+        except subprocess.TimeoutExpired:
+            self._send_json({"ok": False, "error": "Git timed out."})
+            return
+        except OSError as err:
+            self._send_json({"ok": False, "error": f"Could not run git: {err}"})
+            return
+        text = (proc.stdout or "").strip() or (proc.stderr or "").strip()
+        try:
+            payload = json.loads(text) if text.startswith("{") else {"ok": False, "error": text or f"git exit {proc.returncode}"}
+        except json.JSONDecodeError:
+            payload = {"ok": False, "error": text[:400] or f"git exit {proc.returncode}"}
+        self._send_json(payload)
+
+    def _git_commit(self) -> None:
+        payload = self._read_json_body()
+        if payload is None:
+            return
+        comment = str(payload.get("comment") or "")
+        course = str(payload.get("courseId") or "")
+        week = str(payload.get("week") or "")
+        self._git_tool(["commit", "--comment", comment, "--course", course, "--week", week])
 
     def _send_json(self, payload: dict) -> None:
         body = json.dumps(payload).encode("utf-8")

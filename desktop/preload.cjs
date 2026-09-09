@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld('northstarDesktop', {
   loadReading: (courseId, id) => ipcRenderer.invoke('northstar:loadReading', courseId, id),
   deleteReading: (courseId, id) => ipcRenderer.invoke('northstar:deleteReading', courseId, id),
   program: () => ipcRenderer.sendSync('northstar:program'),
+  gitStatus: () => ipcRenderer.invoke('northstar:gitStatus'),
+  gitCommit: (payload) => ipcRenderer.invoke('northstar:gitCommit', payload),
 })
