@@ -1,0 +1,28 @@
+{
+  "id": "/bootcamp.html",
+  "name": "Northstar Bootcamp",
+  "short_name": "Bootcamp",
+  "description": "24-week systems and backend software-engineering path.",
+  "start_url": "/bootcamp.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#241810",
+  "theme_color": "#241810",
+  "lang": "en",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

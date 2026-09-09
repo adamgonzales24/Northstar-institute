@@ -1,0 +1,186 @@
+import { DEFAULT_INTEGRITY, DEFAULT_LATE } from './helpers.js'
+
+export const PROGRAM = {
+  name: 'Northstar Institute',
+  shortName: 'Northstar',
+  kind: 'degree',
+  degree: 'B.S. Software Engineering & Computer Science',
+  degreeShort: 'B.S. SE & CS — Self-Directed',
+  banner: 'B.S. Software Engineering & Computer Science — a full curriculum you can finish while employed.',
+  disclaimer:
+    'Northstar Institute is a self-directed B.S. Software Engineering & Computer Science program. Transcript, syllabi, and portfolio live with your student record.',
+  defaultStart: '2026-09-07',
+  defaultHours: 12,
+  defaultCoursesPerTerm: 2,
+  totalCreditsTarget: 124,
+  genedCredits: 30,
+  mathScienceCredits: 22,
+  csSeCredits: 54,
+  electiveCredits: 12,
+  capstoneCredits: 6,
+  passingPercent: 70,
+  integrity: DEFAULT_INTEGRITY,
+  late: DEFAULT_LATE,
+  studyProtocol: [
+    {
+      title: 'Spaced retrieval',
+      body: 'Close the notes. Write what you remember. Check. The struggle is the learning. Videos feel like progress; retrieval is progress.',
+    },
+    {
+      title: 'Worked examples, then fade',
+      body: 'Study one fully worked problem (or a small program) with the solution visible. Then do a near-transfer problem with the solution hidden. Then change a constraint.',
+    },
+    {
+      title: 'Weekly shipped code (or prose)',
+      body: 'Every week, something leaves your machine: a function, a proof write-up, a paragraph, a failing test you understand. Unshipped weeks do not count.',
+    },
+    {
+      title: 'Interleave, do not binge',
+      body: 'Two courses at 5–6 honest hours beats one 12-hour Saturday. Sleep is part of the compiler.',
+    },
+  ],
+  letterScale: [
+    { letter: 'A', min: 93, gpa: 4.0 },
+    { letter: 'A-', min: 90, gpa: 3.7 },
+    { letter: 'B+', min: 87, gpa: 3.3 },
+    { letter: 'B', min: 83, gpa: 3.0 },
+    { letter: 'B-', min: 80, gpa: 2.7 },
+    { letter: 'C+', min: 77, gpa: 2.3 },
+    { letter: 'C', min: 73, gpa: 2.0 },
+    { letter: 'C-', min: 70, gpa: 1.7 },
+    { letter: 'D', min: 60, gpa: 1.0 },
+    { letter: 'F', min: 0, gpa: 0.0 },
+  ],
+  buckets: [
+    {
+      id: 'gened',
+      name: 'General education & foundations',
+      credits: 30,
+      note: 'A real B.S. includes writing, ethics, civic literacy, and the humanities. You may hide these in CS-only mode — with a warning.',
+    },
+    {
+      id: 'math',
+      name: 'Mathematics & lab science',
+      credits: 22,
+      note: 'Precalculus (MATH 099) is remedial and does not count toward the 124 if you place out. If you take it, it appears on the transcript as additional work.',
+    },
+    {
+      id: 'cs-core',
+      name: 'Computer science core',
+      credits: 33,
+      note: 'Programming, structures, systems, algorithms, and the machine.',
+    },
+    {
+      id: 'se-core',
+      name: 'Software engineering concentration',
+      credits: 21,
+      note: 'Process, architecture, testing, project management, security, HCI, professional practice.',
+    },
+    {
+      id: 'elective',
+      name: 'Technical electives',
+      credits: 12,
+      note: 'Choose 4 of 6. Tracks: embedded, web/cloud, AI/ML, mobile, DevOps/SRE, data-intensive systems.',
+    },
+    {
+      id: 'capstone',
+      name: 'Capstone',
+      credits: 6,
+      note: 'A public product with requirements, architecture, tests, demo, and a technical report.',
+    },
+  ],
+  termModel: {
+    sequence: [
+      { season: 'Fall', weeks: 15, breakAfter: 2 },
+      { season: 'Winter', weeks: 8, breakAfter: 1 },
+      { season: 'Spring', weeks: 15, breakAfter: 1 },
+      { season: 'Summer', weeks: 12, breakAfter: 1 },
+    ],
+    assignmentWeekday: 0, // Sunday
+  },
+  professor: {
+    name: 'Prof. North',
+    title: 'Founding Professor & Academic Advisor',
+    voice: 'Demanding but kind. Honest grades from the local tutor. Ask questions; do not turn in the first draft.',
+  },
+}
+
+export const PACE_OPTIONS = [
+  {
+    id: 'slow',
+    name: 'Slow',
+    years: '6.5–7.5',
+    coursesPerTerm: 1,
+    blurb: 'One heavy course most terms, two when a course is light. Built for 8–10 hours/week.',
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    years: '5–6',
+    coursesPerTerm: 2,
+    blurb: 'Two courses per term including summer and winter. Default. Plan on 10–14 hours/week.',
+  },
+  {
+    id: 'accelerated',
+    name: 'Accelerated',
+    years: '3.5–4.5',
+    coursesPerTerm: 3,
+    blurb: 'Three courses most long terms. Expect 16–22 hours/week. Only if your job is flexible.',
+  },
+]
+
+export const ELECTIVE_CHOICES = ['CS410', 'CS420', 'CS430', 'CS440', 'CS450', 'CS460']
+
+export const REQUIRED_BY_BUCKET = {
+  gened: ['ENG101', 'ENG102', 'ENG210', 'PHIL220', 'POLS110', 'PSY110', 'HUM150', 'WELL101', 'STS200', 'COMM110'],
+  math: ['MATH181', 'MATH182', 'MATH210', 'MATH220', 'MATH250', 'PHYS111'],
+  'cs-core': ['CS101', 'CS110', 'CS120', 'CS215', 'CS220', 'CS230', 'CS310', 'CS320', 'CS330', 'CS340', 'CS350'],
+  'se-core': ['SE210', 'SE310', 'SE320', 'SE330', 'CS360', 'CS370', 'SE400'],
+  capstone: ['SE490', 'SE491'],
+}
+
+export const COURSE_COLORS = {
+  ENG101: '#c45c5c',
+  ENG102: '#c45c5c',
+  ENG210: '#c45c5c',
+  COMM110: '#c45c5c',
+  PHIL220: '#9a6bc8',
+  POLS110: '#6b7ad6',
+  PSY110: '#6b7ad6',
+  HUM150: '#9a6bc8',
+  WELL101: '#4aaa78',
+  STS200: '#9a6bc8',
+  MATH099: '#d4894a',
+  MATH181: '#d4894a',
+  MATH182: '#d4894a',
+  MATH210: '#d4894a',
+  MATH220: '#d4894a',
+  MATH250: '#d4894a',
+  PHYS111: '#3aa8a8',
+  CS101: '#4a8fd4',
+  CS110: '#4a8fd4',
+  CS120: '#4a8fd4',
+  CS215: '#4a8fd4',
+  CS220: '#4a8fd4',
+  CS230: '#4a8fd4',
+  CS310: '#4a8fd4',
+  CS320: '#4a8fd4',
+  CS330: '#4a8fd4',
+  CS340: '#4a8fd4',
+  CS350: '#4a8fd4',
+  SE210: '#d4a017',
+  SE310: '#d4a017',
+  SE320: '#d4a017',
+  SE330: '#d4a017',
+  CS360: '#d4a017',
+  CS370: '#d4a017',
+  SE400: '#d4a017',
+  CS410: '#3aa8a8',
+  CS420: '#3aa8a8',
+  CS430: '#3aa8a8',
+  CS440: '#3aa8a8',
+  CS450: '#3aa8a8',
+  CS460: '#3aa8a8',
+  SE490: '#d4a017',
+  SE491: '#d4a017',
+}

@@ -1,0 +1,6 @@
+export { courses as gened } from './gened.js'
+export { courses as math } from './math.js'
+export { courses as csCore } from './csCore.js'
+export { courses as se } from './se.js'
+export { courses as electives } from './electives.js'
+export { courses as capstone } from './capstone.js'

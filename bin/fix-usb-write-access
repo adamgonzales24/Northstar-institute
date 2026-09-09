@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Make the top of the File Storage stick writable by your user (adam).
+# The stick is ext4 and was created as root, so Dolphin cannot "Create folder" there.
+set -euo pipefail
+stick="/run/media/adam/File Storage"
+if [[ ! -d "$stick" ]]; then
+  echo "USB stick is not mounted at: $stick"
+  exit 1
+fi
+echo "This asks for your Linux password once, then you can create folders on the stick."
+sudo chown "$USER:$USER" "$stick"
+sudo chmod u+rwx "$stick"
+mkdir -p "$stick/Notes" "$stick/Documents"
+echo "Done. You can now create folders at the top of File Storage."
+echo "Notes:      $stick/Notes"
+echo "Documents:  $stick/Documents"

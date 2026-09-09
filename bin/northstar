@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export PATH="${HOME}/.local/node/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+cd "$ROOT"
+
+if [[ ! -f dist/index.html ]]; then
+  echo "Building Northstar Institute…"
+  npm run build
+fi
+
+ELECTRON="$ROOT/node_modules/.bin/electron"
+if [[ ! -e "$ELECTRON" ]]; then
+  echo "Electron is not installed. From $ROOT run: npm install"
+  exit 1
+fi
+
+exec "$ELECTRON" "$ROOT" "$@"
